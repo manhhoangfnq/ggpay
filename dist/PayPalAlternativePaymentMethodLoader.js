@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(["exports"], factory);
+    define(["exports", "./GooglePay.js"], factory);
   } else if (typeof exports !== "undefined") {
-    factory(exports);
+    factory(exports, require("./GooglePay.js"));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports);
+    factory(mod.exports, global.GooglePayJs);
     global.PayPalAlternativePaymentMethodLoader = mod.exports;
   }
-})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports) {
+})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports, _GooglePay) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -23,7 +23,6 @@
   function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
   function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
   function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-  var GooglePayHandler = require('./GooglePay.js');
   var PayPalAlternativePaymentMethodLoader = _exports.PayPalAlternativePaymentMethodLoader = /*#__PURE__*/function () {
     function PayPalAlternativePaymentMethodLoader() {
       _classCallCheck(this, PayPalAlternativePaymentMethodLoader);
@@ -44,7 +43,7 @@
           var paypalSDK = window.paypal;
           var baseDocument = document;
           var jsShoppingCartData = window.jsShoppingCart;
-          var googlePay = new GooglePayHandler(googleSDK, paypalSDK, jsShoppingCartData, baseDocument);
+          var googlePay = new _GooglePay.GooglePayHandler(googleSDK, paypalSDK, jsShoppingCartData, baseDocument);
           googlePay.onGooglePayLoaded().then(function (result) {
             resolve({
               'value': 'gambio_hub-PayPal2Hub-googlepay',
