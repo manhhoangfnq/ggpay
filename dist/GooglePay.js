@@ -8,7 +8,7 @@
       exports: {}
     };
     factory(mod.exports);
-    global.GooglePayModule = mod.exports;
+    global.GooglePay = mod.exports;
   }
 })(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports) {
   "use strict";
@@ -100,6 +100,7 @@
       _defineProperty(_this, "paymentsClient", null);
       _defineProperty(_this, "googlePayConfig", null);
       _defineProperty(_this, "googlePaySDK", null);
+      _defineProperty(_this, "googlePayButton", null);
       _defineProperty(_this, "const", void 0);
       _defineProperty(_this, "GOOGLE_PAY_BUTTON_BLOCK_ID", 'paypal-google-button-container');
       _this.googlePaySDK = googlePaySDK;
@@ -197,10 +198,12 @@
     }, {
       key: "onPaymentAuthorized",
       value: function onPaymentAuthorized(paymentData) {
+        var _this2 = this;
         this.processPayment(paymentData).then(function (result) {
           console.log(result);
         })["catch"](function (error) {
           console.log(error);
+          _this2.handleLockOrUnlockGooglePayButton('unlock');
         });
       }
 
@@ -213,13 +216,14 @@
     }, {
       key: "getGooglePaymentsClient",
       value: function getGooglePaymentsClient() {
-        var _this2 = this;
+        var _this3 = this;
         if (this.paymentsClient === null) {
           this.paymentsClient = new this.googlePaySDK.payments.api.PaymentsClient({
             environment: 'TEST',
             paymentDataCallbacks: {
               onPaymentAuthorized: function onPaymentAuthorized(paymentData) {
-                _this2.onPaymentAuthorized(paymentData);
+                _this3.handleLockOrUnlockGooglePayButton('lock');
+                _this3.onPaymentAuthorized(paymentData);
               }
             }
           });
@@ -237,7 +241,7 @@
       key: "onGooglePayLoaded",
       value: (function () {
         var _onGooglePayLoaded = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4() {
-          var _this3 = this;
+          var _this4 = this;
           var paymentsClient, _yield$this$getGoogle2, allowedPaymentMethods, apiVersion, apiVersionMinor;
           return _regeneratorRuntime().wrap(function _callee4$(_context4) {
             while (1) switch (_context4.prev = _context4.next) {
@@ -257,8 +261,10 @@
                     apiVersionMinor: apiVersionMinor
                   }).then(function (response) {
                     if (response.result === true) {
-                      _this3.addGooglePayButton();
+                      _this4.addGooglePayButton();
                       resolve(response);
+                    } else {
+                      reject(response);
                     }
                   })["catch"](function (err) {
                     reject(err);
@@ -285,13 +291,13 @@
     }, {
       key: "addGooglePayButton",
       value: function addGooglePayButton() {
-        var _this4 = this;
+        var _this5 = this;
         var paymentsClient = this.getGooglePaymentsClient();
         var button = paymentsClient.createButton({
           buttonType: "checkout",
           buttonLocale: this.jsShoppingCart.languageCode,
           onClick: function onClick() {
-            return _this4.onGooglePaymentButtonClicked();
+            return _this5.onGooglePaymentButtonClicked();
           }
         });
         button.id = this.GOOGLE_PAY_BUTTON_BLOCK_ID;
@@ -359,7 +365,7 @@
       key: "processPayment",
       value: (function () {
         var _processPayment = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(paymentData) {
-          var _this5 = this;
+          var _this6 = this;
           var orderData, payPalOrderId, _yield$this$payPalSDK, id, status;
           return _regeneratorRuntime().wrap(function _callee6$(_context6) {
             while (1) switch (_context6.prev = _context6.next) {
@@ -381,7 +387,7 @@
                 return _context6.abrupt("return", new Promise(function (resolve, reject) {
                   if (status === 'APPROVED') {
                     document.querySelector('#checkout_payment input[name="PayPal2HubOrderId"]').value = id;
-                    document.querySelector('#checkout_payment input[name="PayPal2HubPayerId"]').value = _this5.googlePayConfig.merchantInfo.merchantId;
+                    document.querySelector('#checkout_payment input[name="PayPal2HubPayerId"]').value = _this6.googlePayConfig.merchantInfo.merchantId;
                     document.querySelector('#checkout_payment').submit();
                     resolve({
                       transactionState: 'SUCCESS'
@@ -403,6 +409,32 @@
         }
         return processPayment;
       }())
+    }, {
+      key: "handleLockOrUnlockGooglePayButton",
+      value: function handleLockOrUnlockGooglePayButton() {
+        var status = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'lock';
+        var googlePayButton = this.getGooglePayButton();
+        switch (status) {
+          case 'lock':
+            dispatchEvent(new Event('showLoadingButton'));
+            googlePayButton.style.display = 'none';
+            break;
+          case 'unlock':
+            dispatchEvent(new Event('hideLoadingButton'));
+            googlePayButton.style.display = 'block';
+            break;
+          default:
+            break;
+        }
+      }
+    }, {
+      key: "getGooglePayButton",
+      value: function getGooglePayButton() {
+        if (!this.googlePayButton) {
+          this.googlePayButton = this.baseDocument.getElementById(this.GOOGLE_PAY_BUTTON_BLOCK_ID);
+        }
+        return this.googlePayButton;
+      }
     }]);
   }(AlternativeBaseHandler);
 });
