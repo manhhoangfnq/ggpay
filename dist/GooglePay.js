@@ -16,7 +16,7 @@
   Object.defineProperty(_exports, "__esModule", {
     value: true
   });
-  _exports.GooglePayHandler = void 0;
+  _exports.PayPalAlternativePaymentMethodLoader = _exports.GooglePayHandler = void 0;
   function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
   function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
   function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
@@ -437,4 +437,47 @@
       }
     }]);
   }(AlternativeBaseHandler);
+  var PayPalAlternativePaymentMethodLoader = _exports.PayPalAlternativePaymentMethodLoader = /*#__PURE__*/function () {
+    function PayPalAlternativePaymentMethodLoader() {
+      _classCallCheck(this, PayPalAlternativePaymentMethodLoader);
+    }
+    return _createClass(PayPalAlternativePaymentMethodLoader, [{
+      key: "load",
+      value: function load() {
+        var promises = [];
+        promises.push(this.loadGooglePay());
+        return promises;
+      }
+    }, {
+      key: "loadGooglePay",
+      value: function loadGooglePay() {
+        var _this7 = this;
+        return new Promise(function (resolve, reject) {
+          var googleSDK = window.google;
+          var paypalSDK = window.paypal;
+          var baseDocument = document;
+          var jsShoppingCartData = window.jsShoppingCart;
+          var googlePay = new GooglePayHandler(googleSDK, paypalSDK, jsShoppingCartData, baseDocument);
+          googlePay.onGooglePayLoaded().then(function (result) {
+            resolve({
+              'value': 'gambio_hub-PayPal2Hub-googlepay',
+              'container': 'paypal-google-button-container'
+            });
+          })["catch"](function (error) {
+            console.error(error);
+            _this7.removeGooglePaySelection();
+            resolve({});
+          });
+        });
+      }
+    }, {
+      key: "removeGooglePaySelection",
+      value: function removeGooglePaySelection() {
+        var element = document.querySelector('li.gambio_hub-PayPal2Hub-googlepay');
+        if (element) {
+          element.remove();
+        }
+      }
+    }]);
+  }();
 });
